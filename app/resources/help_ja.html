@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>一括ファイル名変更 · 使い方</title>
+<style>
+  body { font-family: "Microsoft YaHei UI", "Microsoft YaHei", sans-serif; color: #1F2937; font-size: 13px; line-height: 1.65; margin: 4px 8px; }
+  h1 { font-size: 20px; color: #111827; margin: 0 0 4px 0; }
+  h2 { font-size: 15px; color: #111827; margin: 18px 0 6px 0; border-left: 3px solid #2F6FED; padding-left: 8px; }
+  p { margin: 5px 0; }
+  ol, ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 3px 0; }
+  table { border-collapse: collapse; margin: 6px 0; }
+  th, td { border: 1px solid #E3E8EF; padding: 4px 8px; text-align: left; }
+  th { background: #F7F9FC; color: #374151; }
+  code { background: #F1F4F9; padding: 1px 4px; border-radius: 4px; color: #255FD0; }
+  kbd { background: #F7F9FC; border: 1px solid #D5DCE6; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+  .muted { color: #6B7280; font-size: 12px; }
+  .note { background: #F5F8FF; border: 1px solid #DCE6FA; border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+  .warn { background: #FFF8F0; border: 1px solid #FBE3C4; border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+</style>
+</head>
+<body>
+<h1>一括ファイル名変更 · 使い方</h1>
+<p class="muted">バージョン v37.21.beta3 · プレビュー優先 · バックアップ後に改名 · いつでも復元</p>
+
+<h2>クイックスタート</h2>
+<ol>
+  <li>「追加」をクリックしてファイルを選ぶか、ファイル／フォルダーをウィンドウにドラッグします（<kbd>Ctrl</kbd>+<kbd>O</kbd> でファイルを追加）。</li>
+  <li>左側の「全体 / 置換 / 追加 / 削除 / メタデータ」タブで規則を設定します。</li>
+  <li>「撮影日時」「プレビュー」列を確認し、問題がなければ「改名を開始」をクリックします。</li>
+  <li>実行前に JSON バックアップを書き込み、一時名を経て 2 段階で改名します。失敗時は自動でロールバックします。</li>
+  <li>元に戻すときは <kbd>Ctrl</kbd>+<kbd>Z</kbd>、または「編集 → ワンクリック復元」を使います。</li>
+</ol>
+
+<h2>命名規則</h2>
+<table>
+  <tr><th>記号</th><th>意味</th><th>例</th></tr>
+  <tr><td><code>*</code></td><td>現在のファイル名（拡張子なし）。追加・削除と置換を適用済み</td><td><code>休暇_*</code> → 休暇_IMG_001</td></tr>
+  <tr><td><code>#</code></td><td>連番。リストの現在の順序で生成</td><td><code>写真_###</code> → 写真_001</td></tr>
+  <tr><td><code>{date}</code></td><td>日付。形式はメタデータタブで設定</td><td>2026-11-21</td></tr>
+  <tr><td><code>{time}</code></td><td>時刻 HHMMSS</td><td>214000</td></tr>
+  <tr><td><code>{datetime}</code></td><td>日時</td><td>2026-11-21_214000</td></tr>
+  <tr><td><code>{name}</code></td><td>元のファイル名（拡張子なし）</td><td>IMG_001</td></tr>
+  <tr><td><code>{ext}</code></td><td>拡張子</td><td>JPG</td></tr>
+  <tr><td><code>{size}</code></td><td>ファイルサイズ（バイト。<code>{size:05d}</code> も指定可）</td><td>04823</td></tr>
+  <tr><td><code>{mtime}</code> / <code>{ctime}</code></td><td>ファイル更新時刻 / 作成時刻</td><td>2026-11-21_203102</td></tr>
+  <tr><td><code>{exif}</code></td><td>撮影日時の元データ</td><td>2026:11:21 21:40:05</td></tr>
+  <tr><td><code>{title}</code></td><td>タイトル / 曲名</td><td>Night Drive</td></tr>
+  <tr><td><code>{artist}</code></td><td>アーティスト / 監督</td><td>Aoi</td></tr>
+  <tr><td><code>{album}</code></td><td>アルバム / シリーズ</td><td>City Lights</td></tr>
+  <tr><td><code>{genre}</code></td><td>ジャンル</td><td>Synthwave</td></tr>
+  <tr><td><code>{tag_year}</code></td><td>リリース年</td><td>2019</td></tr>
+  <tr><td><code>{camera}</code></td><td>カメラ機種</td><td>X100V</td></tr>
+  <tr><td><code>{lens}</code></td><td>レンズ</td><td>23mm F2</td></tr>
+  <tr><td><code>{iso}</code></td><td>ISO 感度</td><td>160</td></tr>
+  <tr><td><code>{aperture}</code></td><td>絞り（ファイル名用）</td><td>f2.8</td></tr>
+  <tr><td><code>{n}</code></td><td>連番（<code>#</code> と同じ）</td><td>1</td></tr>
+</table>
+<p>規則内で日付にカスタム形式も指定できます（例：<code>{date:%Y%m%d}</code>）。<code>\*</code>、<code>\#</code>、<code>\{</code> はリテラル文字を出力します。</p>
+
+<h2>置換と正規表現</h2>
+<ul>
+  <li>通常の置換は既定で大文字と小文字を区別します。「大文字と小文字を区別」をオフにするか、「最初の一致のみ置換」にチェックできます。</li>
+  <li>「正規表現を使用」にチェックするとキャプチャグループが使えます：<code>^IMG_(\d+)</code> → <code>写真_$1</code>。</li>
+  <li><code>\1</code> や <code>${name}</code> も書けます。正規表現が不正な場合は入力欄の下が赤くなり、プレビューは実行されません。</li>
+  <li>「拡張子を含める」は、置換範囲に拡張子部分を含めるかどうかを決めます。</li>
+</ul>
+
+<h2>撮影日時とメタデータ</h2>
+<ul>
+  <li>画像は EXIF <code>DateTimeOriginal</code>、MP4/MOV は <code>mvhd</code> の作成時刻（UTC）を読み取ります。</li>
+  <li>見つからない場合はファイルの更新時刻に自動でフォールバックし、リストに灰色の <b>ⓘ</b> で表示します。ホバーすると取得元と元データを確認できます。</li>
+  <li>日付の取得元、日付フォーマット（カスタム <code>strftime</code> を含む）、タイムゾーンは「メタデータ」タブで設定します。</li>
+  <li>読み取り結果はキャッシュされます。外部でファイルが変更されると自動的に無効になります。右クリックで「撮影日時を再読み取り」を選べます。</li>
+  <li><code>表示 → 撮影日時で並べ替え</code>、または「撮影日時」列のヘッダーをクリックして昇順 / 降順を切り替えます。</li>
+</ul>
+
+<h2>フィルター・並べ替え・連番</h2>
+<ul>
+  <li>上部のフィルターバーで拡張子を選ぶか、<code>mp4;mkv</code> のように複数入力できます。ステータスバーには <code>フィルター 12/55</code> と表示されます。</li>
+  <li>フィルター適用中に改名を実行すると確認を求められ、絞り込まれたファイルのみ処理します。</li>
+  <li>連番 <code>#</code> は常にリストの現在の順序で生成されます。並べ替えや上下移動で番号が変わります。</li>
+</ul>
+
+<h2>バックアップ・元に戻す・復元</h2>
+<ul>
+  <li>改名 / 復元のたびに JSON バックアップを <code>%APPDATA%\批量文件改名\backups</code> に書き込みます。保持するバッチは最大 100 件です。</li>
+  <li>すべての改名は、まず同じフォルダー内の一時名（<code>.~br_*.tmp</code>）に変更し、その後で目的の名前にします。既存ファイルは上書きしません。</li>
+  <li><kbd>Ctrl</kbd>+<kbd>Z</kbd>、右クリックメニュー、または結果ダイアログから直前の改名を元に戻せます。</li>
+  <li>「ファイル → バックアップ管理」または「編集 → ワンクリック復元」で全バッチを確認し、選んだものだけ復元できます。
+      元の場所が使用中の場合は既定でスキップし、自動で <code>(1)</code> を付けることもできます。上書きは行いません。</li>
+  <li>アプリが異常終了した後に再起動すると、未完了のバッチの復元を促します。</li>
+</ul>
+
+<h2>ショートカット</h2>
+<table>
+  <tr><th>ショートカット</th><th>機能</th></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>ファイルを追加</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td><td>フォルダーを追加</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>プリセットを読み込み（.bfr.json）</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>プリセットを書き出し（.bfr.json）</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>直前の改名を元に戻す</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>リストをすべて選択</td></tr>
+  <tr><td><kbd>Delete</kbd></td><td>選択項目をリストから削除（ディスク上のファイルは削除しません）</td></tr>
+  <tr><td><kbd>F1</kbd></td><td>このヘルプを開く</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td><td>終了</td></tr>
+</table>
+
+<h2>プリセットの読み込み / 書き出し</h2>
+<p>書き出した <code>.bfr.json</code> には、すべての規則、メタデータ設定、フィルター拡張子、並べ替え方法が含まれますが、ファイルリストは含まれません。
+そのため、別のパソコンや別のフォルダーでもそのまま再利用できます。ウィンドウサイズ、タブ、最近のプリセットは自動的に記憶されます。</p>
+
+<h2>よくある質問</h2>
+<p><b>実行後に「状態」が未変更になるのはなぜですか？</b><br>
+改名に成功すると、リストは新しいファイル名で再プレビューされます。現在の規則でその新しい名前に変化がない場合は「未変更」と表示されますが、
+「結果」列には「成功」が残ります。</p>
+<p><b>プレビュー列に <code>(1)</code> が表示されるのはなぜですか？</b><br>
+目的の名前がフォルダー内の既存ファイルと衝突し、「名前の衝突を自動解決」が有効になっています。実行時も同名のファイルは避けます。</p>
+<p><b>ファイルが使用中 / 読み取り専用の場合は？</b><br>
+アプリは 3 回再試行します。それでも失敗した場合は、そのファイルを失敗として元のまま残し、残りのファイルの処理を続けます。理由は結果ダイアログで確認できます。</p>
+<p><b>改名の途中でプロセスを強制終了した場合は？</b><br>
+アプリを再起動すると未完了バッチの復元を促し、バックアップにある一時名または新しい名前で復元します。バックアップの JSON は手動で削除しないでください。</p>
+<p><b>exe の初回実行で SmartScreen が表示されるのはなぜですか？</b><br>
+署名されていないプログラムでは通常表示される警告です。提供元を確認したうえで「それでも実行」を選べます。正式配布時はコード署名を推奨します。</p>
+
+<div class="note">バックアップフォルダー：<code>%APPDATA%\批量文件改名\backups</code>。このヘルプはオフラインの内容で、ネットワークにはアクセスしません。</div>
+</body>
+</html>

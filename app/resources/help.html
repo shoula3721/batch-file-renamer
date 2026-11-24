@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>批量文件改名 · 使用说明</title>
+<style>
+  body { font-family: "Microsoft YaHei UI", "Microsoft YaHei", sans-serif; color: #1F2937; font-size: 13px; line-height: 1.65; margin: 4px 8px; }
+  h1 { font-size: 20px; color: #111827; margin: 0 0 4px 0; }
+  h2 { font-size: 15px; color: #111827; margin: 18px 0 6px 0; border-left: 3px solid #2F6FED; padding-left: 8px; }
+  p { margin: 5px 0; }
+  ol, ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 3px 0; }
+  table { border-collapse: collapse; margin: 6px 0; }
+  th, td { border: 1px solid #E3E8EF; padding: 4px 8px; text-align: left; }
+  th { background: #F7F9FC; color: #374151; }
+  code { background: #F1F4F9; padding: 1px 4px; border-radius: 4px; color: #255FD0; }
+  kbd { background: #F7F9FC; border: 1px solid #D5DCE6; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+  .muted { color: #6B7280; font-size: 12px; }
+  .note { background: #F5F8FF; border: 1px solid #DCE6FA; border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+  .warn { background: #FFF8F0; border: 1px solid #FBE3C4; border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+</style>
+</head>
+<body>
+<h1>批量文件改名 · 使用说明</h1>
+<p class="muted">版本 37.21.beta3 · 预览先行 · 先备份后改名 · 随时可还原</p>
+
+<h2>快速开始</h2>
+<ol>
+  <li>点击“添加”选择文件，或把文件 / 文件夹拖进窗口（<kbd>Ctrl</kbd>+<kbd>O</kbd> 添加文件）。</li>
+  <li>在左侧“整体 / 替换 / 添加删除 / 元数据”标签页里设置规则。</li>
+  <li>查看“拍摄时间”“预览”列；确认无误后点击“开始重命名”。</li>
+  <li>执行前会先写入 JSON 备份，再通过临时名两阶段改名，失败自动回滚。</li>
+  <li>需要反悔时按 <kbd>Ctrl</kbd>+<kbd>Z</kbd>，或使用“编辑 → 一键还原”。</li>
+</ol>
+
+<h2>命名规则</h2>
+<table>
+  <tr><th>符号</th><th>含义</th><th>示例</th></tr>
+  <tr><td><code>*</code></td><td>当前文件名（不含扩展名），已应用添加删除与替换</td><td><code>假期_*</code> → 假期_IMG_001</td></tr>
+  <tr><td><code>#</code></td><td>编号，按列表当前顺序生成</td><td><code>照片_###</code> → 照片_001</td></tr>
+  <tr><td><code>{date}</code></td><td>日期，格式由元数据页设置</td><td>2026-11-21</td></tr>
+  <tr><td><code>{time}</code></td><td>时间 HHMMSS</td><td>214000</td></tr>
+  <tr><td><code>{datetime}</code></td><td>日期时间</td><td>2026-11-21_214000</td></tr>
+  <tr><td><code>{name}</code></td><td>原文件名（不含扩展名）</td><td>IMG_001</td></tr>
+  <tr><td><code>{ext}</code></td><td>扩展名</td><td>JPG</td></tr>
+  <tr><td><code>{size}</code></td><td>文件大小（字节，可写 <code>{size:05d}</code>）</td><td>04823</td></tr>
+  <tr><td><code>{mtime}</code> / <code>{ctime}</code></td><td>文件修改时间 / 创建时间</td><td>2026-11-21_203102</td></tr>
+  <tr><td><code>{exif}</code></td><td>拍摄时间原文</td><td>2026:11:21 21:40:05</td></tr>
+  <tr><td><code>{title}</code></td><td>标题 / 曲名</td><td>Night Drive</td></tr>
+  <tr><td><code>{artist}</code></td><td>艺术家 / 导演</td><td>Aoi</td></tr>
+  <tr><td><code>{album}</code></td><td>专辑 / 系列</td><td>City Lights</td></tr>
+  <tr><td><code>{genre}</code></td><td>风格 / 分类</td><td>Synthwave</td></tr>
+  <tr><td><code>{tag_year}</code></td><td>发布年份</td><td>2019</td></tr>
+  <tr><td><code>{camera}</code></td><td>相机型号</td><td>X100V</td></tr>
+  <tr><td><code>{lens}</code></td><td>镜头</td><td>23mm F2</td></tr>
+  <tr><td><code>{iso}</code></td><td>ISO 感光度</td><td>160</td></tr>
+  <tr><td><code>{aperture}</code></td><td>光圈（文件名安全写法）</td><td>f2.8</td></tr>
+  <tr><td><code>{n}</code></td><td>编号（同 <code>#</code>）</td><td>1</td></tr>
+</table>
+<p>规则里还可以给日期写自定义格式，例如 <code>{date:%Y%m%d}</code>；<code>\*</code>、<code>\#</code>、<code>\{</code> 输出字面量。</p>
+
+<h2>替换与正则</h2>
+<ul>
+  <li>普通替换默认区分大小写，可关闭“区分大小写”或勾选“仅替换首次匹配”。</li>
+  <li>勾选“使用正则表达式”后支持捕获组：<code>^IMG_(\d+)</code> → <code>照片_$1</code>。</li>
+  <li>也可以写 <code>\1</code> 或 <code>${name}</code>；正则非法时输入框下方会变红提示，预览不会执行。</li>
+  <li>“包含扩展名”决定替换范围是否包括扩展名部分。</li>
+</ul>
+
+<h2>拍摄时间与元数据</h2>
+<ul>
+  <li>图片读取 EXIF <code>DateTimeOriginal</code>；MP4/MOV 读取 <code>mvhd</code> 创建时间（UTC）。</li>
+  <li>找不到时自动回退文件修改时间，列表用灰色 <b>ⓘ</b> 标记；悬停可看来源与原文。</li>
+  <li>日期来源、日期格式（含自定义 <code>strftime</code>）、时区都在“元数据”页设置。</li>
+  <li>读取结果会缓存；文件被外部修改后自动失效。右键可选择“重新读取拍摄时间”。</li>
+  <li><code>视图 → 按拍摄时间排序</code>，或点击“拍摄时间”表头切换升 / 降序。</li>
+</ul>
+
+<h2>筛选、排序与编号</h2>
+<ul>
+  <li>上方筛选栏可选扩展名，或输入 <code>mp4;mkv</code> 多选；状态栏显示 <code>筛选 12/55</code>。</li>
+  <li>有筛选时执行改名会二次确认，只处理筛选出的文件。</li>
+  <li>编号 <code>#</code> 始终按列表当前顺序生成；排序或上移下移会改变编号。</li>
+</ul>
+
+<h2>备份、撤销与还原</h2>
+<ul>
+  <li>每次改名 / 还原都会先写 JSON 备份到 <code>%APPDATA%\批量文件改名\backups</code>，最多保留 100 个批次。</li>
+  <li>所有改名先改成同目录临时名（<code>.~br_*.tmp</code>），再落到目标名，绝不覆盖已有文件。</li>
+  <li><kbd>Ctrl</kbd>+<kbd>Z</kbd>、右键菜单或结果弹窗可以撤销最近一次重命名。</li>
+  <li>“文件 → 备份管理”或“编辑 → 一键还原”可查看全部批次并选择性还原；
+      原位置被占用时默认跳过，也可自动加 <code>(1)</code>，不提供覆盖。</li>
+  <li>程序异常退出后重新打开，会提示恢复未完成的批次。</li>
+</ul>
+
+<h2>快捷键</h2>
+<table>
+  <tr><th>快捷键</th><th>功能</th></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>添加文件</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td><td>添加文件夹</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>导入方案（.bfr.json）</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>导出方案（.bfr.json）</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>撤销上一次重命名</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>全选列表</td></tr>
+  <tr><td><kbd>Delete</kbd></td><td>从列表移除所选（不删除磁盘文件）</td></tr>
+  <tr><td><kbd>F1</kbd></td><td>打开本帮助</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td><td>退出</td></tr>
+</table>
+
+<h2>方案导入 / 导出</h2>
+<p>导出的 <code>.bfr.json</code> 包含全部规则、元数据设置、筛选扩展名与排序方式，不包含文件列表，
+因此换一台电脑或换一个目录也能直接复用。窗口大小、标签页与最近方案会自动记住。</p>
+
+<h2>常见问题</h2>
+<p><b>为什么执行后“状态”显示未更改？</b><br>
+改名成功后列表会用新文件名重新预览；如果当前规则对新名字没有变化，就会显示“未更改”，
+“结果”列仍保留“成功”。</p>
+<p><b>为什么预览列出现 <code>(1)</code>？</b><br>
+目标名称与目录里已有文件冲突，且开启了“自动解决命名冲突”。执行时也会避开同名文件。</p>
+<p><b>文件被占用 / 只读怎么办？</b><br>
+程序会重试 3 次；仍失败则该文件标记失败并保留原文件，其余文件继续处理。结果弹窗可查看原因。</p>
+<p><b>改名到一半强制结束进程会怎样？</b><br>
+重启程序会提示恢复未完成批次，按备份里的临时名或新名称还原。备份 JSON 请勿手动删除。</p>
+<p><b>exe 首次运行提示 SmartScreen？</b><br>
+未签名程序的正常提示，确认来源后可选择“仍要运行”；正式分发建议代码签名。</p>
+
+<div class="note">备份目录：<code>%APPDATA%\批量文件改名\backups</code>。本帮助为离线内容，不访问网络。</div>
+</body>
+</html>

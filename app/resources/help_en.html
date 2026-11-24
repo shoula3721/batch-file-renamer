@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Batch File Renamer · Instructions</title>
+<style>
+  body { font-family: "Microsoft YaHei UI", "Microsoft YaHei", sans-serif; color: #1F2937; font-size: 13px; line-height: 1.65; margin: 4px 8px; }
+  h1 { font-size: 20px; color: #111827; margin: 0 0 4px 0; }
+  h2 { font-size: 15px; color: #111827; margin: 18px 0 6px 0; border-left: 3px solid #2F6FED; padding-left: 8px; }
+  p { margin: 5px 0; }
+  ol, ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 3px 0; }
+  table { border-collapse: collapse; margin: 6px 0; }
+  th, td { border: 1px solid #E3E8EF; padding: 4px 8px; text-align: left; }
+  th { background: #F7F9FC; color: #374151; }
+  code { background: #F1F4F9; padding: 1px 4px; border-radius: 4px; color: #255FD0; }
+  kbd { background: #F7F9FC; border: 1px solid #D5DCE6; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+  .muted { color: #6B7280; font-size: 12px; }
+  .note { background: #F5F8FF; border: 1px solid #DCE6FA; border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+  .warn { background: #FFF8F0; border: 1px solid #FBE3C4; border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+</style>
+</head>
+<body>
+<h1>Batch File Renamer · Instructions</h1>
+<p class="muted">Version v37.21.beta3 · Preview first · Back up before renaming · Restore anytime</p>
+
+<h2>Quick start</h2>
+<ol>
+  <li>Click “Add” to choose files, or drag files / folders into the window (<kbd>Ctrl</kbd>+<kbd>O</kbd> adds files).</li>
+  <li>Set the rules on the left tabs “Entire name / Replace / Add / Remove / Metadata”.</li>
+  <li>Check the “Shot time” and “Preview” columns, then click “Start renaming” once everything looks right.</li>
+  <li>Before execution a JSON backup is written, then files are renamed in two stages through temporary names; failures roll back automatically.</li>
+  <li>To undo, press <kbd>Ctrl</kbd>+<kbd>Z</kbd> or use “Edit → One-click restore”.</li>
+</ol>
+
+<h2>Naming rules</h2>
+<table>
+  <tr><th>Token</th><th>Meaning</th><th>Example</th></tr>
+  <tr><td><code>*</code></td><td>Current file name (without extension), after add/remove and replacement</td><td><code>Holiday_*</code> → Holiday_IMG_001</td></tr>
+  <tr><td><code>#</code></td><td>Number, generated in the current list order</td><td><code>Photo_###</code> → Photo_001</td></tr>
+  <tr><td><code>{date}</code></td><td>Date; the format is set on the Metadata tab</td><td>2026-11-21</td></tr>
+  <tr><td><code>{time}</code></td><td>Time, HHMMSS</td><td>214000</td></tr>
+  <tr><td><code>{datetime}</code></td><td>Date and time</td><td>2026-11-21_214000</td></tr>
+  <tr><td><code>{name}</code></td><td>Original file name (without extension)</td><td>IMG_001</td></tr>
+  <tr><td><code>{ext}</code></td><td>Extension</td><td>JPG</td></tr>
+  <tr><td><code>{size}</code></td><td>File size (bytes; <code>{size:05d}</code> is also accepted)</td><td>04823</td></tr>
+  <tr><td><code>{mtime}</code> / <code>{ctime}</code></td><td>File modified time / created time</td><td>2026-11-21_203102</td></tr>
+  <tr><td><code>{exif}</code></td><td>Raw shot time</td><td>2026:11:21 21:40:05</td></tr>
+  <tr><td><code>{title}</code></td><td>Title / track</td><td>Night Drive</td></tr>
+  <tr><td><code>{artist}</code></td><td>Artist / director</td><td>Aoi</td></tr>
+  <tr><td><code>{album}</code></td><td>Album / series</td><td>City Lights</td></tr>
+  <tr><td><code>{genre}</code></td><td>Genre</td><td>Synthwave</td></tr>
+  <tr><td><code>{tag_year}</code></td><td>Release year</td><td>2019</td></tr>
+  <tr><td><code>{camera}</code></td><td>Camera model</td><td>X100V</td></tr>
+  <tr><td><code>{lens}</code></td><td>Lens</td><td>23mm F2</td></tr>
+  <tr><td><code>{iso}</code></td><td>ISO sensitivity</td><td>160</td></tr>
+  <tr><td><code>{aperture}</code></td><td>Aperture (file-name safe)</td><td>f2.8</td></tr>
+  <tr><td><code>{n}</code></td><td>Number (same as <code>#</code>)</td><td>1</td></tr>
+</table>
+<p>You can also give dates a custom format in the rule, for example <code>{date:%Y%m%d}</code>; <code>\*</code>, <code>\#</code>, and <code>\{</code> output literal characters.</p>
+
+<h2>Replacement and regex</h2>
+<ul>
+  <li>Plain replacement is case sensitive by default; turn off “Case sensitive” or tick “Replace first match only”.</li>
+  <li>With “Use regular expression” enabled, capture groups are supported: <code>^IMG_(\d+)</code> → <code>photo_$1</code>.</li>
+  <li>You can also write <code>\1</code> or <code>${name}</code>; an invalid regex turns the field red below the input and preview will not run.</li>
+  <li>“Include extension” decides whether the extension is part of the replacement scope.</li>
+</ul>
+
+<h2>Shot time and metadata</h2>
+<ul>
+  <li>Images use EXIF <code>DateTimeOriginal</code>; MP4/MOV use the <code>mvhd</code> creation time (UTC).</li>
+  <li>If none is found, the file modified time is used instead and marked with a gray <b>ⓘ</b> in the list; hover to see the source and raw value.</li>
+  <li>Date source, date format (including custom <code>strftime</code>), and time zone are set on the “Metadata” tab.</li>
+  <li>Results are cached; the cache is invalidated automatically when a file changes outside the app. Right-click to choose “Re-read shot time”.</li>
+  <li><code>View → Sort by shot time</code>, or click the “Shot time” header to toggle ascending / descending.</li>
+</ul>
+
+<h2>Filtering, sorting, and numbering</h2>
+<ul>
+  <li>The filter bar at the top lets you pick extensions or type several, e.g. <code>mp4;mkv</code>; the status bar shows <code>Filter 12/55</code>.</li>
+  <li>With a filter active, renaming asks for confirmation and only processes the filtered files.</li>
+  <li>The number <code>#</code> always follows the current list order; sorting or moving items up / down changes the numbers.</li>
+</ul>
+
+<h2>Backup, undo, and restore</h2>
+<ul>
+  <li>Every rename / restore first writes a JSON backup to <code>%APPDATA%\批量文件改名\backups</code>; up to 100 batches are kept.</li>
+  <li>All renames first change to a temporary name in the same folder (<code>.~br_*.tmp</code>) and then to the target name; existing files are never overwritten.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>Z</kbd>, the context menu, or the result dialog can undo the most recent rename.</li>
+  <li>“File → Backup manager” or “Edit → One-click restore” lists all batches and restores the ones you select;
+      taken original paths are skipped by default, or given an automatic <code>(1)</code>; overwriting is never offered.</li>
+  <li>If the app exits unexpectedly, reopening it offers to recover the unfinished batch.</li>
+</ul>
+
+<h2>Shortcuts</h2>
+<table>
+  <tr><th>Shortcut</th><th>Action</th></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Add files</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td><td>Add folder</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Import preset (.bfr.json)</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Export preset (.bfr.json)</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>Undo last rename</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Select all in list</td></tr>
+  <tr><td><kbd>Delete</kbd></td><td>Remove selected from list (does not delete files on disk)</td></tr>
+  <tr><td><kbd>F1</kbd></td><td>Open this help</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td><td>Exit</td></tr>
+</table>
+
+<h2>Preset import / export</h2>
+<p>An exported <code>.bfr.json</code> contains all rules, metadata settings, filter extensions, and sort order, but not the file list,
+so it can be reused directly on another computer or in another folder. Window size, tabs, and recent presets are remembered automatically.</p>
+
+<h2>FAQ</h2>
+<p><b>Why does “Status” show unchanged after renaming?</b><br>
+After a successful rename the list re-previews with the new file name; if the current rule would not change that new name, it shows “Unchanged”,
+while the “Result” column still records “Succeeded”.</p>
+<p><b>Why does the preview column show <code>(1)</code>?</b><br>
+The target name conflicts with a file already in the folder and “Resolve name conflicts automatically” is on. Execution also avoids files with the same name.</p>
+<p><b>What if a file is locked or read-only?</b><br>
+The app retries 3 times; if it still fails, that file is marked as failed and left untouched while the remaining files continue. The result dialog shows the reason.</p>
+<p><b>What happens if the process is killed halfway through?</b><br>
+Restarting the app offers to recover the unfinished batch, using the temporary names or new names recorded in the backup. Do not delete the backup JSON manually.</p>
+<p><b>Why does SmartScreen appear on the first run of the exe?</b><br>
+It is the normal prompt for an unsigned program; once you have verified the source you can choose “Run anyway”. Code signing is recommended for official distribution.</p>
+
+<div class="note">Backup folder: <code>%APPDATA%\批量文件改名\backups</code>. This help is offline content and does not access the network.</div>
+</body>
+</html>
