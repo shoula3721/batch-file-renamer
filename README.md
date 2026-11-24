@@ -16,15 +16,7 @@ Windows 桌面批量重命名工具。预览先行，改名前后均有备份，
 
 ![整体标签页](docs/ui_step5_overall.png)
 
-![元数据标签页](docs/ui_step5_metadata.png)
-
-![改名结果](docs/ui_step6_demo.png)
-
 ![备份与还原](docs/ui_step6_restore.png)
-
-![方案与配置](docs/ui_step7_demo.png)
-
-![离线帮助](docs/ui_step7_help.png)
 
 ![深色 English](docs/ui_step8_dark_en.png)
 
@@ -53,18 +45,7 @@ python -m venv .venv
 - 深色主题不改变 Windows 原生标题栏；标题栏颜色由系统决定。
 - HEIC / AVIF / RAW 的 EXIF 取决于 Pillow 解码器是否可用；读不到时回退文件修改时间并标注 ⓘ。
 - 文件列表上限 10000 个；元数据首次读取为串行，超大列表首次预览需要几秒（有进度提示）。
-- `dist\` 已用 v37.21.beta3 代码重建：单文件 52.5 MB、单目录 127.0 MB、zip 52.4 MB。单目录版与源码已冒烟验证；单文件版无法在当前开发沙箱内解压自检，请在普通桌面环境双击确认。
-- 未签名 exe 可能触发 SmartScreen 提示；正式分发建议代码签名。
-
-## 开发说明 / Built with DeepSeek
-
-本软件 **使用 DeepSeek 开发**。
-
-- 需求拆解、核心代码、单元测试、界面文案与打包脚本均在 **DeepSeek** AI 编程助手协助下完成。
-- 作者负责需求确认、功能验收、发布与后续维护。
-- DeepSeek 仅用于开发阶段；软件运行时不依赖 DeepSeek 服务，也不会上传文件或元数据。
-
-更完整的说明见 [NOTICE.md](NOTICE.md)。
+- `dist\` 已用 v37.21.beta3 代码重建：单文件 52.5 MB、单目录 127.0 MB、zip 52.4 MB。
 
 ## 许可证
 
