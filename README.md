@@ -8,9 +8,10 @@ Windows 桌面批量重命名工具。预览先行，改名前后均有备份，
 
 ## 下载
 
-- **GitHub Releases**：<https://github.com/shoula3721/batch-file-renamer/releases>
-  - `批量文件改名.exe`：单文件免安装版
-  - `批量文件改名.zip`：单目录版压缩包
+- 源码仓库：<https://github.com/shoula3721/batch-file-renamer>
+- **GitHub Releases**：<https://github.com/shoula3721/batch-file-renamer/releases/tag/v37.21.beta3>
+  - [单文件免安装版](https://github.com/shoula3721/batch-file-renamer/releases/download/v37.21.beta3/BatchFileRenamer-v37.21.beta3.exe)（52.5 MB）
+  - [单目录版压缩包](https://github.com/shoula3721/batch-file-renamer/releases/download/v37.21.beta3/BatchFileRenamer-v37.21.beta3-portable.zip)（52.4 MB）
 - 也可以下载源码后按下方“本地运行”启动。
 
 ## 当前进度
